@@ -1,45 +1,51 @@
-//----DHT-----
+// --- DHT ---
 #include <DHT.h>
-#define DHTPIN 0
+#define DHTPIN 14
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
-float umidade;
-float temperatura;
+int umidade;
+int temperatura;
 
 //----DISPLAY----
+#include <Wire.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-//#define SCREEN_HEIGHT 64
-#define OLED_RESET LED_BUILTIN
-Adafruit_SSD1306 display(OLED_RESET);
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 
-//----SETUP VOID----
+
 void setup() {
   Serial.begin(115200);
   dht.begin();
-  configurarDisplay();
+    configurarDisplay(); 
 }
 
 void loop() {
   realizarMedicoes();
   mostrarNoDisplay();
- 
   
-
 }
+
 //---Funcões Auxiliares----
 
 //----CONFIGURA DISPLAY----
 void configurarDisplay(){
-  display.begin(SSD1306_SWITCHCAPVCC, 0X3C);
-  display.setTextColor(WHITE);
+  Wire.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.clearDisplay();
+  display.setTextColor(WHITE);
 }
 
 void realizarMedicoes() {
   delay(2000);
-  float umidade = dht.readHumidity();
-  float temperatura = dht.readTemperature();
+  umidade = dht.readHumidity();
+  temperatura = dht.readTemperature();
+  Serial.println(umidade);
+  Serial.println(temperatura);
    if (isnan(temperatura) || isnan(umidade)) {
     Serial.println("Falha ao ler o sensor DHT!");
     return;
@@ -63,9 +69,10 @@ void exibeDados(const char* texto1, int medicao, const char* texto2){
   display.print(medicao);
 
   display.setTextSize(2);
-  display.setCursor(0,0);
+  display.setCursor(90,20);
   display.print(texto2);
 
   display.display();
   delay(2000);
 }
+
